@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Stage 1: Formatting (Black and isort)
+echo "Running formatting checks..."
+git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r black
+git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r isort
+
+# Stage 2: Type Checking (mypy)
+echo "Running type checking..."
+git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r mypy
+
+# Add changes back to staging 
+git add -u
+
+exit 0
