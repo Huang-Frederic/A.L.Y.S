@@ -42,6 +42,7 @@ declare -a STEPS=(
   "Adding changes to staging"
 )
 
+# Run commands
 echo "Running formatting and type checking..."
 start
 
