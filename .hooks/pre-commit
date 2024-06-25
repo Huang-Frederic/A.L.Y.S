@@ -1,48 +1,18 @@
 #!/bin/bash
 
-declare -a FRAME=("-" "\\" "|" "/")
-declare -x FRAME_INTERVAL=0.25
+# Stage 1: Formatting (Black and isort)
+echo "Running formatting checks..."
+echo "Running black ..."
+git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r black
+echo "Running isort ..."
+git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r isort
 
-start() {
-  local step=0
+# Stage 2: Type Checking (mypy)
+echo "Running type checking..."
+echo "Running mypy ..."
+git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r mypy
 
-  tput civis -- invisible
-
-  while [ "$step" -lt "${#CMDS[@]}" ]; do
-    ${CMDS[$step]} & pid=$!
-
-    while ps -p $pid &>/dev/null; do
-      echo -ne "\\r[   ] ${STEPS[$step]} ..."
-
-      for k in "${!FRAME[@]}"; do
-        echo -ne "\\r[ ${FRAME[k]} ]"
-        sleep $FRAME_INTERVAL
-      done
-    done
-
-    echo -ne "\\r[ ✔ ] ${STEPS[$step]}\\n"
-    step=$((step + 1))
-  done
-
-  tput cnorm -- normal
-}
-
-# Commands and steps
-declare -a CMDS=(
-  "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r black"
-  "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r isort"
-  "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r mypy"
-  "git add -u"
-)
-
-declare -a STEPS=(
-  "Running black formatting"
-  "Running isort formatting"
-  "Running mypy type checking"
-  "Adding changes to staging"
-)
-
-echo "Running formatting and type checking..."
-start
+# Add changes back to staging 
+git add -u
 
 exit 0
