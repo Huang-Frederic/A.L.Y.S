@@ -73,5 +73,5 @@ class Book:
             f"cover_url='{self.cover_url}', "
             f"authors=[{authors_str}], "
             f"genres=[{genres_str}], "
-            f"chapters={chapters_count} chapters)"
+            f"chapters({chapters_count})={self.chapters[:3]}...)"
         )

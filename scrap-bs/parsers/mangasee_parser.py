@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from models.author_model import Author
 from models.book_model import Book, BookStatus, BookType
 from models.chapter_model import Chapter
+from models.image_model import Image
 from models.genre_model import Genre
 from utils.fetch import fetch_html
 
@@ -14,9 +15,10 @@ from .base_parser import BaseParser
 
 
 class MangaseeParser(BaseParser):
-    def __init__(self, url, book_url):
+    def __init__(self, url, book_url, chapter_url):
         self.url = url
         self.book_url = book_url
+        self.chapter_url = chapter_url
         self.html = fetch_html(self.url)
 
         # self.save_html_to_file(self.html)
@@ -50,14 +52,15 @@ class MangaseeParser(BaseParser):
         books = []
         i = 0
         for book in json_data:
-            if i == 5:
-                break
-            book_html = fetch_html(self.book_url + book["i"])
-            books.append(self.parseBook(book_html))
+            # if i == 5:
+            #     break
+            # book_html = fetch_html(self.book_url + book["i"])
+            # books.append(self.parseBook(book_html))
+            # i = i + 1
+            if book["i"] == "DRCL-midnight-children":
+                book_html = fetch_html(self.book_url + book["i"])
+                books.append(self.parseBook(book_html))
             i = i + 1
-            # if book["i"] == "Solo-Leveling":
-            #     book_html = fetch_html(self.book_url + book["i"])
-            #     books.append(self.parseBook(book_html))
 
         for book in books:
             print(book)
@@ -150,9 +153,27 @@ class MangaseeParser(BaseParser):
 
         # Get parsed chapters as Chapter objects
         for chapter in chapters_data:
-            chapter_number = int((int(chapter["Chapter"]) % 100000) / 10)
+            chapter_number = ((float(chapter["Chapter"]) % 100000) / 10)
             chapter_release = chapter["Date"]
             chapter = Chapter(chapter_number, chapter_release)
             book.add_chapter(chapter)
 
+
+            # Find the pattern to match vm.IndexName assignment
+            pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
+            match = re.search(pattern, book_html)
+            if match:
+                index_name = match.group(1)
+            self.parseImages(index_name, chapter)
+
         return book
+
+    def parseImages(self, index_name, chapter):
+        fetched_html = fetch_html(self.chapter_url + index_name + "-chapter-" + str(chapter.number))
+        chapter_html = BeautifulSoup(fetched_html, "html.parser")
+        images_html = chapter_html.find_all("img", class_="img-fluid")
+
+        for i, image in enumerate(images_html):
+            chapter.add_image(Image(i, image["src"]))
+
+

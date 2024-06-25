@@ -4,8 +4,9 @@ class Chapter:
         self.release = release
         self.images = []
 
-    def add_image(self, image_url):
-        self.images.append(image_url)
+    def add_image(self, image):
+        self.images.append(image)
 
     def __repr__(self):
-        return f"Chapter(number={self.number}, release={self.release}, images={self.images})"
+        images_count = len(self.images)
+        return f"Chapter(number={self.number}, release={self.release}, images({images_count})={self.images[:3]}...)"
