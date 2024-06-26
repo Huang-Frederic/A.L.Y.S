@@ -1,9 +1,9 @@
+import asyncio
 import os
 import time
-import asyncio
 
-from parsers.mangasee_parser import MangaseeParser
 from database.insert_db import insert_db
+from parsers.mangasee_parser import MangaseeParser
 
 
 def main():

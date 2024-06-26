@@ -4,11 +4,12 @@ import re
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+
 from models.author_model import Author
 from models.book_model import Book, BookStatus, BookType
 from models.chapter_model import Chapter
-from models.image_model import Image
 from models.genre_model import Genre
+from models.image_model import Image
 from utils.fetch import fetch_html
 
 from .base_parser import BaseParser
@@ -54,7 +55,7 @@ class MangaseeParser(BaseParser):
             # book_html = fetch_html(self.book_url + book["i"])
             # books.append(self.parseBook(book_html))
             # i = i + 1
-            if book["i"] == "DRCL-midnight-children":
+            if book["i"] == "Solo-Leveling":
                 book_html = fetch_html(self.book_url + book["i"])
                 books.append(self.parseBook(book_html))
             i = i + 1
