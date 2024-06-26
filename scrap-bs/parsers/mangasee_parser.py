@@ -19,12 +19,9 @@ class MangaseeParser(BaseParser):
         self.url = url
         self.book_url = book_url
         self.chapter_url = chapter_url
-        self.html = fetch_html(self.url)
 
-        # self.save_html_to_file(self.html)
-        self.parse(self.html)
-
-    def parse(self, html):
+    def parse(self):
+        html = fetch_html(self.url)
         # Parse the JSON string format
         start_pattern = "vm.Directory = "
         end_pattern = "}];"
@@ -62,8 +59,7 @@ class MangaseeParser(BaseParser):
                 books.append(self.parseBook(book_html))
             i = i + 1
 
-        for book in books:
-            print(book)
+        return books
 
     def parseBook(self, book_html):
         soup = BeautifulSoup(book_html, "html.parser")
@@ -124,10 +120,10 @@ class MangaseeParser(BaseParser):
         book.add_authors(authors_list)
         book.add_genres(genres_list)
 
+        # Extract Chapters
         return self.parseChapters(book, book_html)
 
     def parseChapters(self, book, book_html):
-        # Extract Chapters
         # Parse the JSON string format
         start_pattern = "vm.Chapters = "
         end_pattern = "}];"
@@ -164,11 +160,13 @@ class MangaseeParser(BaseParser):
             match = re.search(pattern, book_html)
             if match:
                 index_name = match.group(1)
+            # Parse the images
             self.parseImages(index_name, chapter)
 
         return book
 
     def parseImages(self, index_name, chapter):
+        # Fetch the chapter page
         fetched_html = fetch_html(self.chapter_url + index_name + "-chapter-" + str(chapter.number))
         chapter_html = BeautifulSoup(fetched_html, "html.parser")
         images_html = chapter_html.find_all("img", class_="img-fluid")
