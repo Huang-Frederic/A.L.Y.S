@@ -14,7 +14,7 @@ Scraping Script :
 ![Static Badge](https://img.shields.io/badge/Python-grey?style=for-the-badge&logo=Python)
 ![Static Badge](https://img.shields.io/badge/BS4-grey?style=for-the-badge&logo=BS4)
 ![Static Badge](https://img.shields.io/badge/Playwright-grey?style=for-the-badge&logo=Playwright)
-env²  
+
 Backend : (Potentially use Pytest)
 
 ![Static Badge](https://img.shields.io/badge/Python-grey?style=for-the-badge&logo=Python)
