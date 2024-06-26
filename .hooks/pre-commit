@@ -27,20 +27,28 @@ start() {
   tput cnorm -- normal
 }
 
-# Commands and steps
-declare -a CMDS=(
-  "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r black"
-  "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r isort"
-  "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs -r mypy"
-  "git add -u"
-)
+# Function to run a command if there are Python files in the git diff
+run_if_py_files_changed() {
+  local cmd=$1
+  local step_desc=$2
 
-declare -a STEPS=(
-  "Running Black formatting"
-  "Running Isort formatting"
-  "Running Mypy type checking"
-  "Adding changes to staging"
-)
+  git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' > /dev/null
+  if [ $? -eq 0 ]; then
+    CMDS+=("$cmd")
+    STEPS+=("$step_desc")
+  fi
+}
+
+# Commands and steps
+CMDS=()
+STEPS=()
+
+run_if_py_files_changed "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs black" "Running Black formatting"
+run_if_py_files_changed "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs isort" "Running Isort formatting"
+run_if_py_files_changed "git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\.py$' | xargs mypy" "Running Mypy type checking"
+
+CMDS+=("git add -u")
+STEPS+=("Adding changes to staging")
 
 # Start the process
 echo "Running formatting and type checking..."

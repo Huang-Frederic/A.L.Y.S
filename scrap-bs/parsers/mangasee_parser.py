@@ -149,11 +149,10 @@ class MangaseeParser(BaseParser):
 
         # Get parsed chapters as Chapter objects
         for chapter in chapters_data:
-            chapter_number = ((float(chapter["Chapter"]) % 100000) / 10)
+            chapter_number = (float(chapter["Chapter"]) % 100000) / 10
             chapter_release = chapter["Date"]
             chapter = Chapter(chapter_number, chapter_release)
             book.add_chapter(chapter)
-
 
             # Find the pattern to match vm.IndexName assignment
             pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
@@ -167,11 +166,11 @@ class MangaseeParser(BaseParser):
 
     def parseImages(self, index_name, chapter):
         # Fetch the chapter page
-        fetched_html = fetch_html(self.chapter_url + index_name + "-chapter-" + str(chapter.number))
+        fetched_html = fetch_html(
+            self.chapter_url + index_name + "-chapter-" + str(chapter.number)
+        )
         chapter_html = BeautifulSoup(fetched_html, "html.parser")
         images_html = chapter_html.find_all("img", class_="img-fluid")
 
         for i, image in enumerate(images_html):
             chapter.add_image(Image(i, image["src"]))
-
-
