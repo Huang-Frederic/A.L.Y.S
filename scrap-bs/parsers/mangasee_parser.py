@@ -3,6 +3,8 @@ import os
 import re
 from pathlib import Path
 from datetime import datetime
+from alive_progress import alive_bar
+import time
 
 from bs4 import BeautifulSoup
 
@@ -12,13 +14,12 @@ from models.chapter_model import Chapter
 from models.genre_model import Genre
 from models.image_model import Image
 from utils.fetch import fetch_html
-from utils.logging import Logger
 
 from .base_parser import BaseParser
 
 class MangaseeParser(BaseParser):
-    def __init__(self, url, book_url, chapter_url):
-        self.logger = Logger()
+    def __init__(self, url, book_url, chapter_url, logger: Logger):
+        self.logger = logger
         self.url = url
         self.book_url = book_url
         self.chapter_url = chapter_url
@@ -61,16 +62,16 @@ class MangaseeParser(BaseParser):
         self.logger.log(f"Found {len(json_data)} books.", log_level="SUCCESS")
         books = []
         for i, book in enumerate(json_data):
-            self.logger.log(f"Processing book {i + 1} of {len(json_data)} : {book['i']}", log_level="INFO")
-            book_html = fetch_html(self.book_url + book["i"])
-            books.append(self.parseBook(book_html))
-            self.logger.log(f"Book {book['i']} processed successfully.", log_level="SUCCESS")
+            if book["i"] == "DRCL-midnight-children":
+                self.logger.log(f"Processing book {i + 1} of {len(json_data)} : {book['i']}", log_level="INFO")
+                book_html = fetch_html(self.book_url + book["i"])
+                books.append(self.parseBook(book_html))
 
         self.logger.log(f"Completed processing {len(books)} books.", log_level="SUCCESS")
         end_time = datetime.now()
-        self.logger.log(f"A.L.Y.S enters slumber at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
+        self.logger.log(f"A.L.Y.S completed first task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
         self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")
-
+        
         return books
 
     def parseBook(self, book_html):
@@ -161,19 +162,21 @@ class MangaseeParser(BaseParser):
             return
 
         self.logger.log(f"Found {len(chapters_data)} chapters.", log_level="SUCCESS")
-        for chapter in chapters_data:
-            chapter_number = (float(chapter["Chapter"]) % 100000) / 10
-            chapter_release = chapter["Date"]
-            chapter = Chapter(chapter_number, chapter_release)
-            book.add_chapter(chapter)
+        with alive_bar(len(chapters_data), title = book.title, spinner = None) as bar:
+            for chapter in chapters_data:
+                chapter_number = (float(chapter["Chapter"]) % 100000) / 10
+                chapter_release = chapter["Date"]
+                chapter = Chapter(chapter_number, chapter_release)
+                book.add_chapter(chapter)
 
-            # Find the pattern to match vm.IndexName assignment
-            pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
-            match = re.search(pattern, book_html)
-            if match:
-                index_name = match.group(1)
-            # Parse the images
-            self.parseImages(index_name, chapter)
+                # Find the pattern to match vm.IndexName assignment
+                pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
+                match = re.search(pattern, book_html)
+                if match:
+                    index_name = match.group(1)
+                # Parse the images
+                self.parseImages(index_name, chapter)
+                bar()
         self.logger.log(f"Chapters for book {book.title} processed successfully.", log_level="SUCCESS")
         return book
 
