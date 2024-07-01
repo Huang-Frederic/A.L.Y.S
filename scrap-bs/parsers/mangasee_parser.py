@@ -1,13 +1,16 @@
 import json
 import os
 import re
-from pathlib import Path
-from datetime import datetime
-from alive_progress import alive_bar
 import time
+from datetime import datetime
+from pathlib import Path
 
+from alive_progress import alive_bar
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from .base_parser import BaseParser
+from database.database_client import DatabaseClient
 from models.author_model import Author
 from models.book_model import Book, BookStatus, BookType
 from models.chapter_model import Chapter
@@ -15,9 +18,6 @@ from models.genre_model import Genre
 from models.image_model import Image
 from utils.fetch import fetch_html
 from utils.logging import Logger
-from database.database_client import DatabaseClient
-
-from .base_parser import BaseParser
 
 class MangaseeParser(BaseParser):
     def __init__(self, url, book_url, chapter_url, logger: Logger, database_client: DatabaseClient):
@@ -57,7 +57,7 @@ class MangaseeParser(BaseParser):
 
         # Turn into JSON format
         try:
-            json_data = json.loads(json_string)
+            json_data = sorted(json.loads(json_string), key=lambda x: x.get('v', 0), reverse=True)
         except json.JSONDecodeError as e:
             self.logger.log(f"Error decoding JSON: {e}", log_level="ERROR")
             return
@@ -65,7 +65,7 @@ class MangaseeParser(BaseParser):
         self.logger.log(f"Found {len(json_data)} books.", log_level="SUCCESS")
         books = []
         for i, book in enumerate(json_data):
-            if i < 2000:
+            if i < 3:
                 self.logger.log(f"Processing book {i + 1} of {len(json_data)} : {book['i']}", log_level="INFO")
                 book_html = fetch_html(self.book_url + book["i"])
                 parsed_book = self.parseBook(book_html)
@@ -140,8 +140,23 @@ class MangaseeParser(BaseParser):
 
         # Extract Chapters
         return self.parseChapters(book, book_html)
+    
+    def process_single_chapter(self, book_html, chapter, book_title):
+        chapter_number = (float(chapter["Chapter"]) % 100000) / 10
+        chapter_release = chapter["Date"]
+        chapter_obj = Chapter(chapter_number, chapter_release)
 
-    def parseChapters(self, book, book_html):        
+        # Find the pattern to match vm.IndexName assignment
+        pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
+        match = re.search(pattern, book_html)
+        if match:
+            index_name = match.group(1)
+
+        # Parse the images
+        self.parseImages(index_name, chapter_obj)
+        return chapter_obj
+
+    def parseChapters(self, book, book_html):
         # Parse the JSON string format
         start_pattern = "vm.Chapters = "
         end_pattern = "}];"
@@ -164,6 +179,8 @@ class MangaseeParser(BaseParser):
             existing_chapters = self.database_client.get_book_chapters_from_title(book.title)
             data = json.loads(json_string)
             chapters_data = []
+            if len(data) >= 500:
+                self.logger.log(f"{book.title} has {len(data)} chapters, we decided to skip it", log_level="SUCCESS")
             if len(data) < 500:
                 for chapter in data:
                     if ((float(chapter["Chapter"]) % 100000) / 10) not in existing_chapters:
@@ -171,26 +188,20 @@ class MangaseeParser(BaseParser):
         except json.JSONDecodeError as e:
             self.logger.log(f"Error decoding JSON: {e}", log_level="ERROR")
             return
-        
-        self.logger.log(f"Found {len(chapters_data)} new chapters for : {book.title}", log_level="SUCCESS")
-        if (len(chapters_data) != 0):
-            with alive_bar(len(chapters_data), title = book.title, spinner = None) as bar:
-                for chapter in chapters_data:
-                    chapter_number = (float(chapter["Chapter"]) % 100000) / 10
-                    chapter_release = chapter["Date"]
-                    chapter = Chapter(chapter_number, chapter_release)
-                    book.add_chapter(chapter)
 
-                    # Find the pattern to match vm.IndexName assignment
-                    pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
-                    match = re.search(pattern, book_html)
-                    if match:
-                        index_name = match.group(1)
-                    # Parse the images
-                    self.parseImages(index_name, chapter)
-                    bar()
-            self.logger.log(f"Chapters for book {book.title} processed successfully.", log_level="SUCCESS")
+        self.logger.log(f"Found {len(chapters_data)} new chapters for : {book.title}", log_level="SUCCESS")
+        if len(chapters_data) != 0:
+            with alive_bar(len(chapters_data), title=f"Processing chapters for {book.title}", spinner="classic") as bar:
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    future_to_chapter = {executor.submit(self.process_single_chapter, book_html, chapter, book.title): chapter for chapter in chapters_data}
+                    for future in as_completed(future_to_chapter):
+                        chapter_obj = future.result()
+                        book.add_chapter(chapter_obj)
+                        bar()
+                self.logger.log(f"Chapters for book {book.title} processed successfully.", log_level="SUCCESS")
         return book
+
+
 
     def parseImages(self, index_name, chapter):
         self.logger.log(f"Parsing images for chapter: {chapter.number}", log_level="INFO")

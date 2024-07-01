@@ -1,8 +1,11 @@
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+
 from supabase import create_client
 from alive_progress import alive_bar
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from utils.logging import Logger
 
 load_dotenv()
@@ -30,40 +33,52 @@ class DatabaseClient:
         if not books:
             self.logger.log("No books to insert", log_level="STATE")
             return
+
         self.logger.log("Initializing A.L.Y.S second task...", log_level="STATE")
         start_time = datetime.now()
-
         self.logger.log(f"A.L.Y.S activated at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
-
         self.logger.log(f"Commencing data insertion in the database", log_level="STATE")
-        for i, book in enumerate(books):
-            self.logger.log(f"Processing book {i + 1} of {len(books)} : {book.title}", log_level="INFO")
-            book_id = self.insert_or_get_book_id(book)
 
-            # Insert authors if they don't exist and link to the book
-            for author in book.authors:
-                author_id = self.insert_author_if_not_exists(author)
-                self.link_book_author(book_id, author_id)
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = []
+            for i, book in enumerate(books):
+                futures.append(executor.submit(self.process_book_insertion, i, len(books), book))
 
-            # Insert genres if they don't exist and link to the book
-            for genre in book.genres:
-                genre_id = self.insert_genre_if_not_exists(genre)
-                self.link_book_genre(book_id, genre_id)
+            for future in as_completed(futures):
+                result = future.result()
+                # Optionally handle results if needed
 
-            # Insert chapters if they don't exist and link to the book
-            with alive_bar(len(book.chapters), title = book.title, spinner = None) as bar:
-                for chapter_data in book.chapters:
-                    self.logger.log(f"inserting chapter {chapter_data.number} : {book.title}", log_level="INFO")
-                    chapter_id = self.insert_or_get_chapter_id(book_id, chapter_data)
-
-                    # Insert images if they don't exist and link to the chapter
-                    for image_data in chapter_data.images:
-                        self.insert_image_if_not_exists(chapter_id, image_data)
-                    bar()
         self.logger.log(f"Completed inserting {len(books)} books.", log_level="SUCCESS")
         end_time = datetime.now()
         self.logger.log(f"A.L.Y.S completed second task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
-        self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")        
+        self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")
+
+    def process_book_insertion(self, i, max, book):
+        self.logger.log(f"Processing book {i + 1} of {max} : {book.title}", log_level="INFO")
+        book_id = self.insert_or_get_book_id(book)
+
+        # Insert authors if they don't exist and link to the book
+        for author in book.authors:
+            author_id = self.insert_author_if_not_exists(author)
+            self.link_book_author(book_id, author_id)
+
+        # Insert genres if they don't exist and link to the book
+        for genre in book.genres:
+            genre_id = self.insert_genre_if_not_exists(genre)
+            self.link_book_genre(book_id, genre_id)
+
+        # Insert chapters if they don't exist and link to the book
+        with alive_bar(len(book.chapters), title=book.title, spinner=None) as bar:
+            for chapter_data in book.chapters:
+                self.logger.log(f"Inserting chapter {chapter_data.number} : {book.title}", log_level="INFO")
+                chapter_id = self.insert_or_get_chapter_id(book_id, chapter_data)
+
+                # Insert images if they don't exist and link to the chapter
+                for image_data in chapter_data.images:
+                    self.insert_image_if_not_exists(chapter_id, image_data)
+                bar()
+
+        return True  # Or any meaningful result if needed
 
     def insert_or_get_book_id(self, book):
         # Check if the book already exists
