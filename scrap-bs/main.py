@@ -17,12 +17,13 @@ def main():
     MangaseeBookUrl = "https://mangasee123.com/manga/"
     MangaseeChapterUrl = "https://mangasee123.com/read-online/"
     mangasee_books = MangaseeParser(
-        MangaseeUrl, MangaseeBookUrl, MangaseeChapterUrl, logger
+        MangaseeUrl, MangaseeBookUrl, MangaseeChapterUrl, logger, database_client
     ).parse()
 
     # Insert the books into the database
     database_client.insert_data(mangasee_books)
 
+    logger.log("A.L.Y.S returned to sleep ...", log_level="STATE")
     logger.close()
 
 

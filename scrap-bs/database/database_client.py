@@ -3,6 +3,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from supabase import create_client
 from alive_progress import alive_bar
+from utils.logging import Logger
 
 load_dotenv()
 
@@ -26,6 +27,9 @@ class DatabaseClient:
 
 
     def insert_data(self, books):
+        if not books:
+            self.logger.log("No books to insert", log_level="STATE")
+            return
         self.logger.log("Initializing A.L.Y.S second task...", log_level="STATE")
         start_time = datetime.now()
 
@@ -56,6 +60,10 @@ class DatabaseClient:
                     for image_data in chapter_data.images:
                         self.insert_image_if_not_exists(chapter_id, image_data)
                     bar()
+        self.logger.log(f"Completed inserting {len(books)} books.", log_level="SUCCESS")
+        end_time = datetime.now()
+        self.logger.log(f"A.L.Y.S completed second task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
+        self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")        
 
     def insert_or_get_book_id(self, book):
         # Check if the book already exists
@@ -250,3 +258,36 @@ class DatabaseClient:
 
             if not inserted_image_response.data:
                 raise Exception(f"Failed to insert image: {inserted_image_response}")
+
+    def get_book_chapters_from_title(self, book_title):
+        book_id = self.get_book_id_by_title(book_title)
+        if not book_id:
+            return []
+
+        # Get chapters for a book
+        response = (
+            self.supabase.table("chapters")
+            .select("number")
+            .eq("book_id", book_id)
+            .execute()
+        )
+
+        if response.data:
+            return [chapter["number"] for chapter in response.data]
+        else:
+            return []
+
+    def get_book_id_by_title(self, book_title):
+        # Query the book_id based on book_title
+        book_response = (
+            self.supabase.table("books")
+            .select("id")
+            .eq("title", book_title)
+            .limit(1) 
+            .execute()
+        )
+
+        if book_response.data:
+            return book_response.data[0]["id"]
+        else:
+            return None
