@@ -1,65 +1,82 @@
 import json
 import os
 import re
+import time
+from datetime import datetime
 from pathlib import Path
 
+from alive_progress import alive_bar
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from .base_parser import BaseParser
+from database.database_client import DatabaseClient
 from models.author_model import Author
 from models.book_model import Book, BookStatus, BookType
 from models.chapter_model import Chapter
 from models.genre_model import Genre
 from models.image_model import Image
 from utils.fetch import fetch_html
-
-from .base_parser import BaseParser
-
+from utils.logging import Logger
 
 class MangaseeParser(BaseParser):
-    def __init__(self, url, book_url, chapter_url):
+    def __init__(self, url, book_url, chapter_url, logger: Logger, database_client: DatabaseClient):
+        self.logger = logger
+        self.database_client = database_client
         self.url = url
         self.book_url = book_url
         self.chapter_url = chapter_url
 
     def parse(self):
+        self.logger.log("Initializing A.L.Y.S system...", log_level="STATE")
+        start_time = datetime.now()
+        self.logger.log(f"A.L.Y.S activated at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
+
+        self.logger.log(f"Commencing data extraction from: {self.url}", log_level="STATE")
         html = fetch_html(self.url)
+        if not html:
+            self.logger.log("Failed to fetch HTML content.", log_level="ERROR")
+            return
+
         # Parse the JSON string format
         start_pattern = "vm.Directory = "
         end_pattern = "}];"
 
         start_index = html.find(start_pattern)
         if start_index == -1:
-            print("Start pattern not found.")
+            self.logger.log("Start pattern ([vm.Directory =]) not found.", log_level="ERROR")
             return
         start_index += len(start_pattern)
 
         end_index = html.find(end_pattern, start_index)
         if end_index == -1:
-            print("End pattern not found.")
+            self.logger.log("End pattern ([}];]) not found.", log_level="ERROR")
             return
         end_index += len(end_pattern)
         json_string = html[start_index:end_index].rstrip(";")
 
         # Turn into JSON format
         try:
-            json_data = json.loads(json_string)
+            json_data = sorted(json.loads(json_string), key=lambda x: x.get('v', 0), reverse=True)
         except json.JSONDecodeError as e:
-            print("Error decoding JSON:", e)
+            self.logger.log(f"Error decoding JSON: {e}", log_level="ERROR")
+            return
 
-        # Get parsed books as Book objects
+        self.logger.log(f"Found {len(json_data)} books.", log_level="SUCCESS")
         books = []
-        i = 0
-        for book in json_data:
-            # if i == 5:
-            #     break
-            # book_html = fetch_html(self.book_url + book["i"])
-            # books.append(self.parseBook(book_html))
-            # i = i + 1
-            if book["i"] == "Solo-Leveling":
+        for i, book in enumerate(json_data):
+            if i < 3:
+                self.logger.log(f"Processing book {i + 1} of {len(json_data)} : {book['i']}", log_level="INFO")
                 book_html = fetch_html(self.book_url + book["i"])
-                books.append(self.parseBook(book_html))
-            i = i + 1
+                parsed_book = self.parseBook(book_html)
+                if len(parsed_book.chapters) != 0:
+                    books.append(parsed_book)
 
+        self.logger.log(f"Completed processing {len(json_data)} books, {len(books)} to insert.", log_level="SUCCESS")
+        end_time = datetime.now()
+        self.logger.log(f"A.L.Y.S completed first task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
+        self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")
+        
         return books
 
     def parseBook(self, book_html):
@@ -74,7 +91,7 @@ class MangaseeParser(BaseParser):
         inner_div = title_div.find("div", class_="bottom-10") if title_div else None
         title = inner_div.get_text(strip=True) if inner_div else None
 
-        # Find the <li> elements and extract more informations
+        # Find the <li> elements and extract more information
         extracted_list = soup.find_all("li", class_="list-group-item d-none d-md-block")
         # Initialize lists
         authors_list = []
@@ -123,6 +140,21 @@ class MangaseeParser(BaseParser):
 
         # Extract Chapters
         return self.parseChapters(book, book_html)
+    
+    def process_single_chapter(self, book_html, chapter, book_title):
+        chapter_number = (float(chapter["Chapter"]) % 100000) / 10
+        chapter_release = chapter["Date"]
+        chapter_obj = Chapter(chapter_number, chapter_release)
+
+        # Find the pattern to match vm.IndexName assignment
+        pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
+        match = re.search(pattern, book_html)
+        if match:
+            index_name = match.group(1)
+
+        # Parse the images
+        self.parseImages(index_name, chapter_obj)
+        return chapter_obj
 
     def parseChapters(self, book, book_html):
         # Parse the JSON string format
@@ -131,47 +163,59 @@ class MangaseeParser(BaseParser):
 
         start_index = book_html.find(start_pattern)
         if start_index == -1:
-            print("Start pattern not found.")
+            self.logger.log("Start pattern ([vm.Chapters = ]) not found.", log_level="ERROR")
             return
         start_index += len(start_pattern)
 
         end_index = book_html.find(end_pattern, start_index)
         if end_index == -1:
-            print("End pattern not found.")
+            self.logger.log("End pattern ([ }]; ]) not found.", log_level="ERROR")
             return
         end_index += len(end_pattern)
         json_string = book_html[start_index:end_index].rstrip(";")
 
         # Turn into JSON format
         try:
-            chapters_data = json.loads(json_string)
+            existing_chapters = self.database_client.get_book_chapters_from_title(book.title)
+            data = json.loads(json_string)
+            chapters_data = []
+            if len(data) >= 500:
+                self.logger.log(f"{book.title} has {len(data)} chapters, we decided to skip it", log_level="SUCCESS")
+            if len(data) < 500:
+                for chapter in data:
+                    if ((float(chapter["Chapter"]) % 100000) / 10) not in existing_chapters:
+                        chapters_data.append(chapter)
         except json.JSONDecodeError as e:
-            print("Error decoding JSON:", e)
+            self.logger.log(f"Error decoding JSON: {e}", log_level="ERROR")
+            return
 
-        # Get parsed chapters as Chapter objects
-        for chapter in chapters_data:
-            chapter_number = (float(chapter["Chapter"]) % 100000) / 10
-            chapter_release = chapter["Date"]
-            chapter = Chapter(chapter_number, chapter_release)
-            book.add_chapter(chapter)
-
-            # Find the pattern to match vm.IndexName assignment
-            pattern = r'vm\.IndexName\s*=\s*"([^"]+)"'
-            match = re.search(pattern, book_html)
-            if match:
-                index_name = match.group(1)
-            # Parse the images
-            self.parseImages(index_name, chapter)
-
+        self.logger.log(f"Found {len(chapters_data)} new chapters for : {book.title}", log_level="SUCCESS")
+        if len(chapters_data) != 0:
+            with alive_bar(len(chapters_data), title=f"Processing chapters for {book.title}", spinner="classic") as bar:
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    future_to_chapter = {executor.submit(self.process_single_chapter, book_html, chapter, book.title): chapter for chapter in chapters_data}
+                    for future in as_completed(future_to_chapter):
+                        chapter_obj = future.result()
+                        book.add_chapter(chapter_obj)
+                        bar()
+                self.logger.log(f"Chapters for book {book.title} processed successfully.", log_level="SUCCESS")
         return book
 
+
+
     def parseImages(self, index_name, chapter):
+        self.logger.log(f"Parsing images for chapter: {chapter.number}", log_level="INFO")
+        
         # Fetch the chapter page
         fetched_html = fetch_html(
             self.chapter_url + index_name + "-chapter-" + str(chapter.number)
         )
+        if not fetched_html:
+            self.logger.log(f"Failed to fetch chapter HTML content.", log_level="ERROR")
+            return
         chapter_html = BeautifulSoup(fetched_html, "html.parser")
         images_html = chapter_html.find_all("img", class_="img-fluid")
 
+        self.logger.log(f"Found {len(images_html)} images.", log_level="DEBUG")
         for i, image in enumerate(images_html):
             chapter.add_image(Image(i, image["src"]))

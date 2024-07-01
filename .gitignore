@@ -4,3 +4,5 @@ env
 __pycache__
 
 saved_parsed.html
+
+logs
