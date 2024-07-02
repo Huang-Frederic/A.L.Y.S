@@ -26,6 +26,7 @@ class MangaseeParser(BaseParser):
         self.url = url
         self.book_url = book_url
         self.chapter_url = chapter_url
+        self.load_config()
 
     def parse(self):
         self.logger.log("Initializing A.L.Y.S system...", log_level="STATE")
@@ -65,14 +66,14 @@ class MangaseeParser(BaseParser):
         self.logger.log(f"Found {len(json_data)} books.", log_level="SUCCESS")
         books = []
         for i, book in enumerate(json_data):
-            if i < 3:
-                self.logger.log(f"Processing book {i + 1} of {len(json_data)} : {book['i']}", log_level="INFO")
+            if i < self.max_books:
+                self.logger.log(f"Processing book {i + 1} of {len(json_data) if len(json_data)<self.max_books else self.max_books } : {book['i']}", log_level="INFO")
                 book_html = fetch_html(self.book_url + book["i"])
                 parsed_book = self.parseBook(book_html)
                 if len(parsed_book.chapters) != 0:
                     books.append(parsed_book)
 
-        self.logger.log(f"Completed processing {len(json_data)} books, {len(books)} to insert.", log_level="SUCCESS")
+        self.logger.log(f"Completed processing {len(json_data)} books, {len(json_data) if len(json_data)<self.max_books else self.max_books } to insert.", log_level="SUCCESS")
         end_time = datetime.now()
         self.logger.log(f"A.L.Y.S completed first task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
         self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")
@@ -179,20 +180,19 @@ class MangaseeParser(BaseParser):
             existing_chapters = self.database_client.get_book_chapters_from_title(book.title)
             data = json.loads(json_string)
             chapters_data = []
-            if len(data) >= 500:
-                self.logger.log(f"{book.title} has {len(data)} chapters, we decided to skip it", log_level="SUCCESS")
-            if len(data) < 500:
+            if len(data) >= self.chapter_limit:
+                self.logger.log(f"{book.title} has {len(data)} chapters, the book has been skipped", log_level="SUCCESS")
+            if len(data) < self.chapter_limit:
                 for chapter in data:
                     if ((float(chapter["Chapter"]) % 100000) / 10) not in existing_chapters:
                         chapters_data.append(chapter)
+                self.logger.log(f"Found {len(chapters_data)} new chapters for : {book.title}", log_level="SUCCESS")
         except json.JSONDecodeError as e:
             self.logger.log(f"Error decoding JSON: {e}", log_level="ERROR")
             return
-
-        self.logger.log(f"Found {len(chapters_data)} new chapters for : {book.title}", log_level="SUCCESS")
         if len(chapters_data) != 0:
             with alive_bar(len(chapters_data), title=f"Processing chapters for {book.title}", spinner="classic") as bar:
-                with ThreadPoolExecutor(max_workers=4) as executor:
+                with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
                     future_to_chapter = {executor.submit(self.process_single_chapter, book_html, chapter, book.title): chapter for chapter in chapters_data}
                     for future in as_completed(future_to_chapter):
                         chapter_obj = future.result()

@@ -1,5 +1,6 @@
 import json
 import os
+import configparser
 from abc import ABC, abstractmethod
 
 
@@ -16,3 +17,10 @@ class BaseParser(ABC):
             f.write(html)
 
         print(f"HTML saved to {file_path}")
+    
+    def load_config(self):
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        self.chapter_limit = config.getint("scraping", "chapter_limit", fallback=500)
+        self.max_books = config.getint("scraping", "max_books", fallback=1000)
+        self.max_threads = config.getint("multithreading", "max_threads", fallback=6)

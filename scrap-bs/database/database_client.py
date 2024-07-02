@@ -1,4 +1,5 @@
 import os
+import configparser
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -14,7 +15,10 @@ class DatabaseClient:
     def __init__(self, logger: Logger):
         # Configure logging
         self.logger = logger
-        
+        self.init_client()
+        self.load_config()
+    
+    def init_client(self):
         # Load environment variables
         required_env_vars = ["SUPABASE_URL", "SUPABASE_KEY"]
         missing_vars = [var for var in required_env_vars if not os.getenv(var)]
@@ -27,7 +31,11 @@ class DatabaseClient:
         self.SUPABASE_URL = os.getenv("SUPABASE_URL")
         self.SUPABASE_KEY = os.getenv("SUPABASE_KEY")
         self.supabase = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)  # type: ignore
-
+    
+    def load_config(self):
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        self.max_threads = config.getint("multithreading", "max_threads", fallback=6)
 
     def insert_data(self, books):
         if not books:
@@ -39,46 +47,44 @@ class DatabaseClient:
         self.logger.log(f"A.L.Y.S activated at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
         self.logger.log(f"Commencing data insertion in the database", log_level="STATE")
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = []
-            for i, book in enumerate(books):
-                futures.append(executor.submit(self.process_book_insertion, i, len(books), book))
+        for i, book in enumerate(books):
+            self.logger.log(f"Processing book {i + 1} of {len(books)} : {book.title}", log_level="INFO")
+            book_id = self.insert_or_get_book_id(book)
 
-            for future in as_completed(futures):
-                result = future.result()
-                # Optionally handle results if needed
+            # Insert authors if they don't exist and link to the book
+            for author in book.authors:
+                author_id = self.insert_author_if_not_exists(author)
+                self.link_book_author(book_id, author_id)
+
+            # Insert genres if they don't exist and link to the book
+            for genre in book.genres:
+                genre_id = self.insert_genre_if_not_exists(genre)
+                self.link_book_genre(book_id, genre_id)
+
+            # Insert chapters if they don't exist and link to the book
+            with alive_bar(len(book.chapters), title=book.title, spinner=None) as bar:
+                with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
+                    futures = [
+                        executor.submit(self.process_chapter_insertion, book_id, chapter_data)
+                        for chapter_data in book.chapters
+                    ]
+
+                    for future in as_completed(futures):
+                        future.result()
+                        bar()
 
         self.logger.log(f"Completed inserting {len(books)} books.", log_level="SUCCESS")
         end_time = datetime.now()
         self.logger.log(f"A.L.Y.S completed second task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
         self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")
 
-    def process_book_insertion(self, i, max, book):
-        self.logger.log(f"Processing book {i + 1} of {max} : {book.title}", log_level="INFO")
-        book_id = self.insert_or_get_book_id(book)
+    def process_chapter_insertion(self, book_id, chapter_data):
+        self.logger.log(f"Inserting chapter {chapter_data.number}", log_level="INFO")
+        chapter_id = self.insert_or_get_chapter_id(book_id, chapter_data)
 
-        # Insert authors if they don't exist and link to the book
-        for author in book.authors:
-            author_id = self.insert_author_if_not_exists(author)
-            self.link_book_author(book_id, author_id)
-
-        # Insert genres if they don't exist and link to the book
-        for genre in book.genres:
-            genre_id = self.insert_genre_if_not_exists(genre)
-            self.link_book_genre(book_id, genre_id)
-
-        # Insert chapters if they don't exist and link to the book
-        with alive_bar(len(book.chapters), title=book.title, spinner=None) as bar:
-            for chapter_data in book.chapters:
-                self.logger.log(f"Inserting chapter {chapter_data.number} : {book.title}", log_level="INFO")
-                chapter_id = self.insert_or_get_chapter_id(book_id, chapter_data)
-
-                # Insert images if they don't exist and link to the chapter
-                for image_data in chapter_data.images:
-                    self.insert_image_if_not_exists(chapter_id, image_data)
-                bar()
-
-        return True  # Or any meaningful result if needed
+        # Insert images if they don't exist and link to the chapter
+        for image_data in chapter_data.images:
+            self.insert_image_if_not_exists(chapter_id, image_data)
 
     def insert_or_get_book_id(self, book):
         # Check if the book already exists
@@ -298,7 +304,7 @@ class DatabaseClient:
             self.supabase.table("books")
             .select("id")
             .eq("title", book_title)
-            .limit(1) 
+            .limit(1)
             .execute()
         )
 

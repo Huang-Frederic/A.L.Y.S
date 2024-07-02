@@ -8,6 +8,7 @@ class BookType(Enum):
     MANHWA = "Manhwa"
     MANHUA = "Manhua"
     MANGA = "Manga"
+    OEL = "OEL"
 
 
 class BookStatus(Enum):
