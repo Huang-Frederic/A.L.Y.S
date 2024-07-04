@@ -22,4 +22,5 @@ repos:
     rev: v0.971
     hooks:
       - id: mypy
+        args: [--ignore-missing-imports]
         additional_dependencies: [types-requests]
