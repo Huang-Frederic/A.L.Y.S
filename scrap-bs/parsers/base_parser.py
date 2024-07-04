@@ -1,12 +1,13 @@
+import configparser
 import json
 import os
-import configparser
 from abc import ABC, abstractmethod
 
 
 class BaseParser(ABC):
     @abstractmethod
-    def parse(self, html): ...
+    def parse(self, html):
+        ...
 
     def save_html_to_file(self, html):
         file_name = "saved_parsed.html"
@@ -17,7 +18,7 @@ class BaseParser(ABC):
             f.write(html)
 
         print(f"HTML saved to {file_path}")
-    
+
     def load_config(self):
         config = configparser.ConfigParser()
         config.read("config.ini")

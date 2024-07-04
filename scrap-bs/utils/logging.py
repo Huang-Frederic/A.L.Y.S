@@ -1,6 +1,7 @@
+import configparser
 import os
 from datetime import datetime
-import configparser
+
 
 class Logger:
     LOGS_DIR = "logs"
@@ -22,7 +23,9 @@ class Logger:
     def load_config(self):
         config = configparser.ConfigParser()
         config.read("config.ini")
-        self.show_debug_logs = config.getboolean("logging", "show_debug_logs", fallback=True)
+        self.show_debug_logs = config.getboolean(
+            "logging", "show_debug_logs", fallback=True
+        )
 
     def log(self, message, log_level="INFO"):
         if self.log_file:

@@ -1,10 +1,6 @@
-import asyncio
-import os
-import time
-
-from utils.logging import Logger
 from database.database_client import DatabaseClient
 from parsers.mangasee_parser import MangaseeParser
+from utils.logging import Logger
 
 
 def main():
@@ -12,16 +8,13 @@ def main():
     logger = Logger()
     database_client = DatabaseClient(logger)
 
-    # Get the books from the Mangasee website
+    # Get, Parse and Insert from the Mangasee website
     MangaseeUrl = "https://mangasee123.com/search/?sort=v&desc=true"
     MangaseeBookUrl = "https://mangasee123.com/manga/"
     MangaseeChapterUrl = "https://mangasee123.com/read-online/"
-    mangasee_books = MangaseeParser(
+    MangaseeParser(
         MangaseeUrl, MangaseeBookUrl, MangaseeChapterUrl, logger, database_client
     ).parse()
-
-    # Insert the books into the database
-    database_client.insert_data(mangasee_books)
 
     logger.log("A.L.Y.S returned to sleep ...", log_level="STATE")
     logger.close()

@@ -1,15 +1,14 @@
-import os
 import configparser
-from datetime import datetime
-from dotenv import load_dotenv
-
-from supabase import create_client
-from alive_progress import alive_bar
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from alive_progress import alive_bar
+from dotenv import load_dotenv
+from supabase import create_client
 from utils.logging import Logger
 
 load_dotenv()
+
 
 class DatabaseClient:
     def __init__(self, logger: Logger):
@@ -17,66 +16,72 @@ class DatabaseClient:
         self.logger = logger
         self.init_client()
         self.load_config()
-    
+
     def init_client(self):
         # Load environment variables
         required_env_vars = ["SUPABASE_URL", "SUPABASE_KEY"]
         missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 
         if missing_vars:
-            self.logger.log(f'Missing environment variables: {", ".join(missing_vars)}', log_level="ERROR")
-            raise EnvironmentError(f'Missing environment variables: {", ".join(missing_vars)}')
+            self.logger.log(
+                f'Missing environment variables: {", ".join(missing_vars)}',
+                log_level="ERROR",
+            )
+            raise EnvironmentError(
+                f'Missing environment variables: {", ".join(missing_vars)}'
+            )
 
         # Configure Supabase client
         self.SUPABASE_URL = os.getenv("SUPABASE_URL")
         self.SUPABASE_KEY = os.getenv("SUPABASE_KEY")
         self.supabase = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)  # type: ignore
-    
+
     def load_config(self):
         config = configparser.ConfigParser()
         config.read("config.ini")
         self.max_threads = config.getint("multithreading", "max_threads", fallback=6)
 
-    def insert_data(self, books):
-        if not books:
-            self.logger.log("No books to insert", log_level="STATE")
+    def insert_book(self, book):
+        if not book:
+            self.logger.log(
+                "Error occured, tried to insert a ghostly book ", log_level="ERROR"
+            )
             return
 
-        self.logger.log("Initializing A.L.Y.S second task...", log_level="STATE")
-        start_time = datetime.now()
-        self.logger.log(f"A.L.Y.S activated at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
-        self.logger.log(f"Commencing data insertion in the database", log_level="STATE")
+        self.logger.log(
+            f"Initializing A.L.Y.S second task for {book.title}", log_level="STATE"
+        )
 
-        for i, book in enumerate(books):
-            self.logger.log(f"Processing book {i + 1} of {len(books)} : {book.title}", log_level="INFO")
-            book_id = self.insert_or_get_book_id(book)
+        # Insert the book if it doesn't exist
+        book_id = self.insert_or_get_book_id(book)
 
-            # Insert authors if they don't exist and link to the book
-            for author in book.authors:
-                author_id = self.insert_author_if_not_exists(author)
-                self.link_book_author(book_id, author_id)
+        # Insert authors if they don't exist and link to the book
+        for author in book.authors:
+            author_id = self.insert_author_if_not_exists(author)
+            self.link_book_author(book_id, author_id)
 
-            # Insert genres if they don't exist and link to the book
-            for genre in book.genres:
-                genre_id = self.insert_genre_if_not_exists(genre)
-                self.link_book_genre(book_id, genre_id)
+        # Insert genres if they don't exist and link to the book
+        for genre in book.genres:
+            genre_id = self.insert_genre_if_not_exists(genre)
+            self.link_book_genre(book_id, genre_id)
 
-            # Insert chapters if they don't exist and link to the book
-            with alive_bar(len(book.chapters), title=book.title, spinner=None) as bar:
-                with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
-                    futures = [
-                        executor.submit(self.process_chapter_insertion, book_id, chapter_data)
-                        for chapter_data in book.chapters
-                    ]
+        # Insert chapters if they don't exist and link to the book
+        with alive_bar(len(book.chapters), title=book.title, spinner=None) as bar:
+            with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
+                futures = [
+                    executor.submit(
+                        self.process_chapter_insertion, book_id, chapter_data
+                    )
+                    for chapter_data in book.chapters
+                ]
 
-                    for future in as_completed(futures):
-                        future.result()
-                        bar()
+                for future in as_completed(futures):
+                    future.result()
+                    bar()
 
-        self.logger.log(f"Completed inserting {len(books)} books.", log_level="SUCCESS")
-        end_time = datetime.now()
-        self.logger.log(f"A.L.Y.S completed second task at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", log_level="STATE")
-        self.logger.log(f"Total time active: {end_time - start_time}", log_level="STATE")
+        self.logger.log(
+            f"A.L.Y.S completed second task : {book.title}", log_level="STATE"
+        )
 
     def process_chapter_insertion(self, book_id, chapter_data):
         self.logger.log(f"Inserting chapter {chapter_data.number}", log_level="INFO")
@@ -135,18 +140,26 @@ class DatabaseClient:
         )
 
         if existing_author_response.data:
-            self.logger.log(f"Author {author.first_name} {author.last_name} already exists", log_level="DEBUG")
+            self.logger.log(
+                f"Author {author.first_name} {author.last_name} already exists",
+                log_level="DEBUG",
+            )
             author_id = existing_author_response.data[0]["id"]
         else:
             # Insert new author
             inserted_author_response = (
                 self.supabase.table("authors")
-                .insert({"first_name": author.first_name, "last_name": author.last_name})
+                .insert(
+                    {"first_name": author.first_name, "last_name": author.last_name}
+                )
                 .execute()
             )
 
             if inserted_author_response.data:
-                self.logger.log(f"Inserted author {author.first_name} {author.last_name}", log_level="DEBUG")
+                self.logger.log(
+                    f"Inserted author {author.first_name} {author.last_name}",
+                    log_level="DEBUG",
+                )
                 author_id = inserted_author_response.data[0]["id"]
             else:
                 raise Exception(f"Failed to insert author: {inserted_author_response}")
@@ -229,7 +242,9 @@ class DatabaseClient:
         )
 
         if existing_chapter_response.data:
-            self.logger.log(f"Chapter {chapter_data.number} already exists", log_level="DEBUG")
+            self.logger.log(
+                f"Chapter {chapter_data.number} already exists", log_level="DEBUG"
+            )
             chapter_id = existing_chapter_response.data[0]["id"]
         else:
             # Insert new chapter
@@ -246,10 +261,14 @@ class DatabaseClient:
             )
 
             if inserted_chapter_response.data:
-                self.logger.log(f"Inserted chapter {chapter_data.number}", log_level="DEBUG")
+                self.logger.log(
+                    f"Inserted chapter {chapter_data.number}", log_level="DEBUG"
+                )
                 chapter_id = inserted_chapter_response.data[0]["id"]
             else:
-                raise Exception(f"Failed to insert chapter: {inserted_chapter_response}")
+                raise Exception(
+                    f"Failed to insert chapter: {inserted_chapter_response}"
+                )
 
         return chapter_id
 
