@@ -20,8 +20,15 @@ class BaseParser(ABC):
         print(f"HTML saved to {file_path}")
 
     def load_config(self):
+        # Load the configuration from the config.ini file
         config = configparser.ConfigParser()
         config.read("config.ini")
         self.chapter_limit = config.getint("scraping", "chapter_limit", fallback=500)
         self.max_books = config.getint("scraping", "max_books", fallback=1000)
         self.max_threads = config.getint("multithreading", "max_threads", fallback=6)
+        self.blacklisted_books = json.loads(
+            config.get("scraping", "blacklisted_books", fallback="[]")
+        )
+        self.whitelisted_books = json.loads(
+            config.get("scraping", "whitelisted_books", fallback="[]")
+        )

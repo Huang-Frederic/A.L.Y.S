@@ -1,3 +1,5 @@
+about-time==4.2.1
+alive-progress==3.1.5
 annotated-types==0.7.0
 anyio==4.4.0
 astroid==3.2.2
@@ -8,12 +10,15 @@ black==24.4.2
 certifi==2024.6.2
 charset-normalizer==3.3.2
 click==8.1.7
+configparser==7.0.0
 deprecation==2.1.0
 dill==0.3.8
 exceptiongroup==1.2.1
+flake8==7.1.0
 gitdb==4.0.11
 GitPython==3.1.43
 gotrue==2.5.4
+grapheme==0.6.0
 greenlet==3.0.3
 h11==0.14.0
 httpcore==1.0.5
@@ -29,9 +34,11 @@ pathspec==0.12.1
 platformdirs==4.2.2
 playwright==1.44.0
 postgrest==0.16.8
+pycodestyle==2.12.0
 pydantic==2.7.4
 pydantic_core==2.18.4
 pyee==11.1.0
+pyflakes==3.2.0
 pylint==3.2.3
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
@@ -51,3 +58,4 @@ types-beautifulsoup4==4.12.0.20240511
 types-html5lib==1.1.11.20240228
 typing_extensions==4.12.2
 urllib3==2.2.2
+websockets==12.0

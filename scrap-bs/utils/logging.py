@@ -7,6 +7,7 @@ class Logger:
     LOGS_DIR = "logs"
 
     def __init__(self):
+        # Initialization
         self.init_logging()
         self.timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         self.load_config()
@@ -27,15 +28,17 @@ class Logger:
             "logging", "show_debug_logs", fallback=True
         )
 
+    # Log messages with different log levels
     def log(self, message, log_level="INFO"):
         if self.log_file:
-            log_line = f"[{self.timestamp}] [{log_level}] {message}\n"
+            log_line = f"[{log_level}] {message}\n"
             self.log_file.write(log_line)  # Write to log file
             if log_level != "DEBUG" or self.show_debug_logs:
                 self.print_colored(log_line, log_level)  # Print to console with color
         else:
-            self.print_colored(f"Error: Log file not open for writing.", "ERROR")
+            self.print_colored("Error: Log file not open for writing.", "ERROR")
 
+    # Print messages with different colors based on log level
     def print_colored(self, message, log_level):
         if log_level == "INFO":
             print(f"\033[96m{message}\033[0m")  # Cyan text for global information

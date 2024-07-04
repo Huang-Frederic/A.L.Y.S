@@ -23,3 +23,5 @@ repos:
     hooks:
       - id: flake8
         include: \.py$
+        args:
+          - '--ignore=E501, E203, E225, E202, W503, F541'

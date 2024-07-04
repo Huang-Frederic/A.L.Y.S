@@ -12,7 +12,7 @@ load_dotenv()
 
 class DatabaseClient:
     def __init__(self, logger: Logger):
-        # Configure logging
+        # Initialization
         self.logger = logger
         self.init_client()
         self.load_config()
@@ -27,6 +27,7 @@ class DatabaseClient:
                 f'Missing environment variables: {", ".join(missing_vars)}',
                 log_level="ERROR",
             )
+            self.logger.close()
             raise EnvironmentError(
                 f'Missing environment variables: {", ".join(missing_vars)}'
             )
@@ -37,6 +38,7 @@ class DatabaseClient:
         self.supabase = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)  # type: ignore
 
     def load_config(self):
+        # Load configuration from config.ini
         config = configparser.ConfigParser()
         config.read("config.ini")
         self.max_threads = config.getint("multithreading", "max_threads", fallback=6)
@@ -76,6 +78,11 @@ class DatabaseClient:
                 ]
 
                 for future in as_completed(futures):
+                    if future.exception():
+                        self.logger.log(
+                            f"Error inserting chapter: {future.exception()}",
+                            log_level="ERROR",
+                        )
                     future.result()
                     bar()
 
