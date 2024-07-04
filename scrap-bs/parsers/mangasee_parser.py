@@ -231,7 +231,7 @@ class MangaseeParser(BaseParser):
             ):
                 self.logger.log(
                     f"{book.title} has {len(data)} chapters, the book has been skipped",
-                    log_level="SUCCESS",
+                    log_level="INFO",
                 )
             # Process all chapters if the book is whitelisted or has less than the chapter limit
             if len(data) < self.chapter_limit or book.title in self.whitelisted_books:
@@ -248,7 +248,7 @@ class MangaseeParser(BaseParser):
                     )
                 else:
                     self.logger.log(
-                        f"No new chapters found for : {book.title}", log_level="SUCCESS"
+                        f"No new chapters found for : {book.title}", log_level="INFO"
                     )
         except json.JSONDecodeError as e:
             self.logger.log(f"Error decoding JSON: {e}", log_level="ERROR")
