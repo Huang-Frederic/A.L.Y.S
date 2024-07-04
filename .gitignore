@@ -1,6 +1,10 @@
-env
 .env
+
+# scrap-bs
+env
 .mypy_cache
 __pycache__
 
 saved_parsed.html
+logs
+queries.sql

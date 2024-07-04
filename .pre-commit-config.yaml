@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: trailing-whitespace
+        include: \.py$
+      - id: end-of-file-fixer
+        include: \.py$
+      - id: check-yaml
+      - id: check-json
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        include: \.py$
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+        include: \.py$
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        include: \.py$
+        args:
+          - '--ignore=E501, E203, E225, E202, W503, F541'

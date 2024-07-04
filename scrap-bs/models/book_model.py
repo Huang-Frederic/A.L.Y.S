@@ -8,6 +8,7 @@ class BookType(Enum):
     MANHWA = "Manhwa"
     MANHUA = "Manhua"
     MANGA = "Manga"
+    OEL = "OEL"
 
 
 class BookStatus(Enum):
@@ -69,7 +70,7 @@ class Book:
             f"release={self.release}, "
             f"type={self.type.value}, "
             f"status={self.status.value}, "
-            f"description='{self.description[:50]}...', "  # Show first 50 characters of description
+            f"description='{self.description[:50]}...', "
             f"cover_url='{self.cover_url}', "
             f"authors=[{authors_str}], "
             f"genres=[{genres_str}], "
