@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobile_flutter/database/auth.dart';
 import '../utils/colors.dart';
@@ -37,89 +38,93 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: AlysColors.black,
       body: Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: EdgeInsets.all(40.0.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 200),
+                SizedBox(height: 200.h),
                 SvgPicture.asset(
                   'assets/logo.svg',
-                  width: 150,
-                  height: 150,
+                  width: 150.w,
+                  height: 150.h,
                   colorFilter: const ColorFilter.mode(
                       AlysColors.alysBlue, BlendMode.srcIn),
                 ),
-                const SizedBox(height: 50),
+                SizedBox(height: 50.h),
                 TextField(
                   controller: _emailController,
                   cursorColor: AlysColors.kingYellow,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    labelStyle: TextStyle(color: AlysColors.alysBlue),
+                    labelStyle:
+                        TextStyle(color: AlysColors.alysBlue, fontSize: 16.sp),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AlysColors.kingYellow),
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          const BorderSide(color: AlysColors.kingYellow),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0.r)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AlysColors.kingYellow),
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          const BorderSide(color: AlysColors.kingYellow),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0.r)),
                     ),
                   ),
-                  style: const TextStyle(color: AlysColors.alysBlue),
+                  style: TextStyle(color: AlysColors.alysBlue, fontSize: 16.sp),
                 ),
-                const SizedBox(height: 16.0),
+                SizedBox(height: 16.h),
                 TextField(
                   controller: _passwordController,
                   cursorColor: AlysColors.kingYellow,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: TextStyle(color: AlysColors.alysBlue),
+                    labelStyle:
+                        TextStyle(color: AlysColors.alysBlue, fontSize: 16.sp),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AlysColors.kingYellow),
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          const BorderSide(color: AlysColors.kingYellow),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0.r)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AlysColors.kingYellow),
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide:
+                          const BorderSide(color: AlysColors.kingYellow),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0.r)),
                     ),
                   ),
                   obscureText: true,
-                  style: const TextStyle(
-                    color: AlysColors.alysBlue,
-                  ),
+                  style: TextStyle(color: AlysColors.alysBlue, fontSize: 16.sp),
                 ),
-                const SizedBox(height: 32.0),
+                SizedBox(height: 32.h),
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50.0, vertical: 15.0),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 50.0.w, vertical: 15.0.h),
                     backgroundColor: AlysColors.kingYellow,
-                    textStyle: const TextStyle(
-                      fontSize: 14,
+                    textStyle: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                   ),
                   child: const Text(
                     'Open the Gates',
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: AlysColors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
+              padding: EdgeInsets.only(bottom: 16.0.h),
               child: Text(
                 'This app is private, ask the owner for access.',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 11.sp,
                   color: AlysColors.alysBlue.withOpacity(0.8),
                 ),
                 textAlign: TextAlign.center,

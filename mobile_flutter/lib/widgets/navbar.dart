@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_flutter/pages/bookmark_page.dart';
 import 'package:mobile_flutter/pages/home_page.dart';
 import 'package:mobile_flutter/pages/profile_page.dart';
@@ -41,13 +42,14 @@ class NavBar extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.5),
             spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, -3), // changes position of shadow
+            blurRadius: 10.r,
+            offset: Offset(0, -3.h),
           ),
         ],
       ),
       child: BottomAppBar(
-        color: Colors.transparent, // To ensure the Container color is applied
+        color: Colors.transparent,
+        height: 90.0.h,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
@@ -68,24 +70,24 @@ class NavBar extends StatelessWidget {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        padding: EdgeInsets.symmetric(horizontal: 10.0.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(
               icon,
-              size: label == "Bookmark" ? 26.0 : 30.0,
+              size: label == "Bookmark" ? 26.0.sp : 30.0.sp,
               color: isSelected ? AlysColors.kingYellow : AlysColors.alysBlue,
             ),
             Container(
-              margin: const EdgeInsets.only(top: 5.0),
-              height: 4.0,
-              width: 30.0,
+              margin: EdgeInsets.only(top: 5.0.h),
+              height: 4.0.h,
+              width: 30.0.w,
               decoration: BoxDecoration(
                 color: isSelected
                     ? AlysColors.kingYellow
                     : AlysColors.kingYellow.withOpacity(0),
-                borderRadius: BorderRadius.circular(30.0),
+                borderRadius: BorderRadius.circular(30.0.r),
               ),
             ),
           ],

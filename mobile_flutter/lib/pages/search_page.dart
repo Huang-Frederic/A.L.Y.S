@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 import '../widgets/appbar_bell.dart';
@@ -38,6 +39,7 @@ class _SearchPageState extends State<SearchPage> {
           : Center(
               child: Image.network(
                 'https://temp.compsci88.com/cover/Monster-8.jpg',
+                width: 300.w,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) {
                     return child;

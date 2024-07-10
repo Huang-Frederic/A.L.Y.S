@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../utils/colors.dart';
 
 void snackBar(BuildContext context, String message, {bool isError = false}) {
   final icon = isError
-      ? const Icon(CupertinoIcons.clear_circled, color: Colors.red, size: 30)
-      : const Icon(CupertinoIcons.checkmark_alt_circle,
-          color: Colors.green, size: 30);
+      ? Icon(CupertinoIcons.clear_circled, color: Colors.red, size: 30.sp)
+      : Icon(CupertinoIcons.checkmark_alt_circle,
+          color: Colors.green, size: 30.sp);
 
   final overlay = Overlay.of(context);
   late OverlayEntry overlayEntry;
@@ -76,30 +77,30 @@ class _SnackBarOverlayState extends State<SnackBarOverlay>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 75.0,
-      left: 30.0,
-      right: 30.0,
+      top: 75.h,
+      left: 30.w,
+      right: 30.w,
       child: Material(
         color: Colors.transparent,
         child: FadeTransition(
           opacity: _animation,
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: AlysColors.grey,
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(10.r),
             ),
             child: Row(
               children: [
                 widget.icon,
-                const SizedBox(width: 8.0),
+                SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
                     ),
                     textAlign: TextAlign.center,
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_flutter/pages/notification_page.dart';
 import 'package:mobile_flutter/utils/navigations.dart';
 import '../utils/colors.dart';
@@ -16,16 +17,16 @@ class AppBarWithBell extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: AlysColors.black,
-      automaticallyImplyLeading: false, // Remove default leading widget
+      automaticallyImplyLeading: false,
       title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+        padding: EdgeInsets.symmetric(horizontal: 25.0.w),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 32,
+              style: TextStyle(
+                fontSize: 32.sp,
                 fontWeight: FontWeight.w600,
                 color: AlysColors.alysBlue,
               ),
@@ -35,7 +36,7 @@ class AppBarWithBell extends StatelessWidget implements PreferredSizeWidget {
                 CupertinoIcons.bell_fill,
                 color: AlysColors.alysBlue,
               ),
-              iconSize: 26.0,
+              iconSize: 26.0.sp,
               onPressed: () {
                 navigateTo(
                     context, const NotificationPage(), AxisDirection.right);

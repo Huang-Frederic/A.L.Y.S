@@ -4,6 +4,7 @@ import 'package:mobile_flutter/pages/home_page.dart';
 import 'package:mobile_flutter/pages/login_page.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:mobile_flutter/widgets/snackbar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../utils/navigations.dart';
 import '../utils/colors.dart';
 import '../database/auth.dart';
@@ -53,15 +54,15 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             SvgPicture.asset(
               'assets/logo.svg',
-              width: 200,
-              height: 200,
+              width: 200.w,
+              height: 200.h,
               colorFilter:
                   const ColorFilter.mode(AlysColors.alysBlue, BlendMode.srcIn),
             ),
-            const Text(
+            Text(
               'ALYS',
               style: TextStyle(
-                fontSize: 60,
+                fontSize: 60.w,
                 fontFamily: 'CrimsonPro',
                 color: AlysColors.alysBlue,
               ),

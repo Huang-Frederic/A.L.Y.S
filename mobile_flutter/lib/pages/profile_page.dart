@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobile_flutter/pages/login_page.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
+import 'package:mobile_flutter/utils/colors.dart';
+import 'package:mobile_flutter/utils/navigations.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 import '../widgets/appbar_bell.dart';
 import '../widgets/navbar.dart';
+import '../database/auth.dart'; // Import the auth service
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -27,6 +32,12 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  Future<void> _logout() async {
+    await authLogout(context);
+    // Navigate to login page after logout
+    navigateTo(context, LoginPage(), AxisDirection.left);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +47,43 @@ class _ProfilePageState extends State<ProfilePage> {
               retryPage: ProfilePage(),
             )
           : Center(
-              child: Image.network(
-                'https://temp.compsci88.com/cover/Boku-No-Hero-Academia.jpg',
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  }
-                  return const Center(child: CircularProgressIndicator());
-                },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.network(
+                    'https://temp.compsci88.com/cover/Boku-No-Hero-Academia.jpg',
+                    width: 300.w,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
+                    onPressed: _logout,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 50.w, vertical: 15.h),
+                      backgroundColor: AlysColors.kingYellow,
+                      textStyle: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.r),
+                      ),
+                    ),
+                    child: Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: AlysColors.black,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
       bottomNavigationBar: const NavBar(

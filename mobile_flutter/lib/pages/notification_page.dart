@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:mobile_flutter/utils/colors.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 
@@ -39,16 +41,16 @@ class _NotificationPageState extends State<NotificationPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AlysColors.black,
-        title: const Text(
+        title: Text(
           'Notifications',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 28.sp,
             fontWeight: FontWeight.w600,
             color: AlysColors.alysBlue,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(CupertinoIcons.left_chevron, size: 25),
+          icon: Icon(CupertinoIcons.left_chevron, size: 25.sp),
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onPressed: () => Navigator.pop(context),
@@ -56,9 +58,9 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               CupertinoIcons.ellipsis_vertical,
-              size: 25,
+              size: 25.sp,
             ),
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
@@ -69,7 +71,7 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
+          preferredSize: Size.fromHeight(50.0.h),
           child: Container(
             color: AlysColors.black,
             child: Row(
@@ -98,12 +100,12 @@ class _NotificationPageState extends State<NotificationPage> {
       child: GestureDetector(
         onTap: () => _onTabTapped(index),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: EdgeInsets.symmetric(vertical: 16.0.h),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
                 color: isSelected ? AlysColors.kingYellow : Colors.transparent,
-                width: 2.0,
+                width: 2.0.h,
               ),
             ),
           ),
@@ -112,7 +114,7 @@ class _NotificationPageState extends State<NotificationPage> {
               label,
               style: TextStyle(
                 color: isSelected ? AlysColors.kingYellow : AlysColors.alysBlue,
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -134,24 +136,24 @@ class NoNotificationContent extends StatelessWidget {
         children: [
           Stack(
             children: [
-              const Icon(
+              Icon(
                 CupertinoIcons.bell_slash,
-                size: 100,
+                size: 100.sp,
                 color: AlysColors.alysBlue,
               ),
               Positioned(
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(14.w),
                   decoration: const BoxDecoration(
                     color: Colors.transparent,
                     shape: BoxShape.circle,
                   ),
-                  child: const Text(
+                  child: Text(
                     '0',
                     style: TextStyle(
                       color: Colors.transparent,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -159,25 +161,25 @@ class NoNotificationContent extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: 20.h),
+          Text(
             'No Notification to show',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: AlysColors.alysBlue,
             ),
           ),
-          const SizedBox(height: 10),
-          const Text(
-            'The notification feature is not available yet, I will notify you\nwhen something new happens!',
+          SizedBox(height: 10.h),
+          Text(
+            'The notification feature is not available yet, I will notify you when something new happens!',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               color: AlysColors.alysBlue,
             ),
           ),
-          const SizedBox(height: 80),
+          SizedBox(height: 80.h),
         ],
       ),
     );
