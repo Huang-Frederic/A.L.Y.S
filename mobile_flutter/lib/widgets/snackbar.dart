@@ -30,14 +30,14 @@ class SnackBarOverlay extends StatefulWidget {
   final VoidCallback onDismissed;
 
   const SnackBarOverlay({
-    Key? key,
+    super.key,
     required this.icon,
     required this.message,
     required this.onDismissed,
-  }) : super(key: key);
+  });
 
   @override
-  _SnackBarOverlayState createState() => _SnackBarOverlayState();
+  State<SnackBarOverlay> createState() => _SnackBarOverlayState();
 }
 
 class _SnackBarOverlayState extends State<SnackBarOverlay>

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mobile_flutter/pages/home_page.dart';
+import 'package:mobile_flutter/pages/login_page.dart';
 import '../utils/navigations.dart';
 import '../utils/colors.dart';
+import '../database/auth.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,15 +17,19 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToLoginAfterDelay();
+    _navigateAfterDelay();
   }
 
-  Future<void> _navigateToLoginAfterDelay() async {
+  Future<void> _navigateAfterDelay() async {
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) {
       return;
     }
-    navigateToLogin(context, AxisDirection.right);
+    if (checkSession(context)) {
+      navigateTo(context, const HomePage(), AxisDirection.right);
+    } else {
+      navigateTo(context, const LoginPage(), AxisDirection.right);
+    }
   }
 
   @override

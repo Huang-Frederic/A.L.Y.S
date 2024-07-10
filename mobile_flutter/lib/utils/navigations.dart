@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
-import '../pages/login_page.dart';
-import '../pages/home_page.dart';
 
-void navigateToLogin(BuildContext context, AxisDirection direction) async {
+void navigateTo(
+    BuildContext context, Widget targetPage, AxisDirection direction) {
   Navigator.pushReplacement(
     context,
     CustomPageRoute(
-      child: const LoginPage(),
+      child: targetPage,
       direction: direction,
     ),
-  );
-}
-
-void navigateToHome(BuildContext context, AxisDirection direction) {
-  Navigator.pushReplacement(
-    context,
-    CustomPageRoute(child: const HomePage(), direction: direction),
   );
 }
 

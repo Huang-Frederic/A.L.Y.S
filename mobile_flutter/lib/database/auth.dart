@@ -1,7 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_flutter/pages/home_page.dart';
+import 'package:mobile_flutter/pages/login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../utils/snackbar.dart';
+import '../widgets/snackbar.dart';
 import '../utils/navigations.dart';
+
+bool checkSession(BuildContext context) {
+  final SupabaseClient supabase = Supabase.instance.client;
+
+  try {
+    final session = supabase.auth.currentSession;
+
+    if (session != null) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    snackBar(context, 'Session recovery has failed, please login again.',
+        isError: true);
+    return false;
+  }
+}
 
 void authLogin(BuildContext context, String email, String password) async {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -17,7 +37,7 @@ void authLogin(BuildContext context, String email, String password) async {
     final User? user = response.user;
 
     if (!context.mounted) return;
-    navigateToHome(context, AxisDirection.right);
+    navigateTo(context, const HomePage(), AxisDirection.right);
   } catch (e) {
     snackBar(context,
         'Login has failed, please check your credentials or call the admin.',
@@ -31,7 +51,7 @@ Future<void> authLogout(BuildContext context) async {
   try {
     await supabase.auth.signOut();
     if (!context.mounted) return;
-    navigateToLogin(context, AxisDirection.left);
+    navigateTo(context, const LoginPage(), AxisDirection.left);
   } catch (e) {
     snackBar(context,
         'Logout has failed, please check your credentials or call the admin.',
