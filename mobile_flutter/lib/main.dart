@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'pages/splash_screen.dart';
-import 'pages/login_page.dart';
-import 'pages/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,12 +25,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.pink,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginPage(),
-        '/home': (context) => const HomePage(),
-      },
+      home: const SplashScreen(),
     );
   }
 }

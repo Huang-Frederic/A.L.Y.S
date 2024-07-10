@@ -1,18 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_flutter/utils/check_connectivity.dart';
+import 'package:mobile_flutter/widgets/no_wifi.dart';
 import '../widgets/appbar_bell.dart';
 import '../widgets/navbar.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool isConnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+  }
+
+  Future<void> _checkConnectivity() async {
+    bool result = await handleConnectivity();
+    setState(() {
+      isConnected = result;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: AppBarWithBell(title: 'Profile'),
-      body: Center(
-        child: Text('Profile Page Content'),
-      ),
-      bottomNavigationBar: NavBar(
+    return Scaffold(
+      appBar: const AppBarWithBell(title: 'Profile'),
+      body: !isConnected
+          ? const NoWifiWidget(
+              retryPage: ProfilePage(),
+            )
+          : Center(
+              child: Image.network(
+                'https://temp.compsci88.com/cover/Boku-No-Hero-Academia.jpg',
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
+            ),
+      bottomNavigationBar: const NavBar(
         selectedLabel: 'Profile',
       ),
     );

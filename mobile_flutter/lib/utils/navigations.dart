@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_flutter/pages/home_page.dart';
 
 void navigateTo(
     BuildContext context, Widget targetPage, AxisDirection direction) {
-  Navigator.pushReplacement(
-    context,
-    CustomPageRoute(
-      child: targetPage,
-      direction: direction,
-    ),
-  );
+  if (targetPage.runtimeType == const HomePage().runtimeType) {
+    Navigator.pushReplacement(
+      context,
+      CustomPageRoute(
+        child: targetPage,
+        direction: direction,
+      ),
+    );
+  } else {
+    Navigator.push(
+      context,
+      CustomPageRoute(
+        child: targetPage,
+        direction: direction,
+      ),
+    );
+  }
 }
 
 class CustomPageRoute extends PageRouteBuilder {

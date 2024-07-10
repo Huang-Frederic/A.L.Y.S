@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/pages/home_page.dart';
 import 'package:mobile_flutter/pages/login_page.dart';
+import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/snackbar.dart';
 import '../utils/navigations.dart';
@@ -11,11 +12,7 @@ bool checkSession(BuildContext context) {
   try {
     final session = supabase.auth.currentSession;
 
-    if (session != null) {
-      return true;
-    } else {
-      return false;
-    }
+    return session != null;
   } catch (e) {
     snackBar(context, 'Session recovery has failed, please login again.',
         isError: true);
@@ -25,24 +22,41 @@ bool checkSession(BuildContext context) {
 
 void authLogin(BuildContext context, String email, String password) async {
   final SupabaseClient supabase = Supabase.instance.client;
+
+  // Check for connectivity first
+  if (!await handleConnectivity()) {
+    if (!context.mounted) return;
+    snackBar(context,
+        'No internet connection. Please check your WiFi or mobile data.',
+        isError: true);
+    return;
+  }
+
   try {
     final AuthResponse response = await supabase.auth.signInWithPassword(
       email: email,
       password: password,
     );
 
-    // ignore: unused_local_variable
     final Session? session = response.session;
-    // ignore: unused_local_variable
     final User? user = response.user;
 
     if (!context.mounted) return;
-    navigateTo(context, const HomePage(), AxisDirection.right);
-  } catch (e) {
-    snackBar(context,
-        'Login has failed, please check your credentials or call the admin.',
-        isError: true);
-    return;
+
+    if (session != null && user != null) {
+      navigateTo(context, const HomePage(), AxisDirection.right);
+    } else {
+      snackBar(context,
+          'Login has failed. Please check your credentials and try again.',
+          isError: true);
+    }
+  } catch (error) {
+    if (!context.mounted) return;
+    if (error is AuthException) {
+      snackBar(context, 'Login has failed: ${error.message}', isError: true);
+    } else {
+      snackBar(context, 'Unexpected error: $error', isError: true);
+    }
   }
 }
 

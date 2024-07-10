@@ -34,16 +34,29 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: AlysColors.black,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          _buildNavItem(context, 'Home', CupertinoIcons.globe),
-          _buildNavItem(context, 'Search', CupertinoIcons.search),
-          _buildNavItem(context, 'Bookmark', CupertinoIcons.bookmark_fill),
-          _buildNavItem(context, 'Profile', CupertinoIcons.person_fill),
+    return Container(
+      decoration: BoxDecoration(
+        color: AlysColors.black,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, -3), // changes position of shadow
+          ),
         ],
+      ),
+      child: BottomAppBar(
+        color: Colors.transparent, // To ensure the Container color is applied
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            _buildNavItem(context, 'Home', CupertinoIcons.globe),
+            _buildNavItem(context, 'Search', CupertinoIcons.search),
+            _buildNavItem(context, 'Bookmark', CupertinoIcons.bookmark_fill),
+            _buildNavItem(context, 'Profile', CupertinoIcons.person_fill),
+          ],
+        ),
       ),
     );
   }

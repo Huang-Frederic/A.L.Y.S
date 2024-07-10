@@ -38,6 +38,7 @@ dependencies:
   flutter_svg: ^2.0.10
   supabase_flutter: ^2.5.7
   flutter_dotenv: ^5.0.2
+  connectivity_plus: ^6.0.3
 
 dev_dependencies:
   flutter_test:

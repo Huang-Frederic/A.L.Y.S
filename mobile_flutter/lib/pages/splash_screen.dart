@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobile_flutter/pages/home_page.dart';
 import 'package:mobile_flutter/pages/login_page.dart';
+import 'package:mobile_flutter/utils/check_connectivity.dart';
+import 'package:mobile_flutter/widgets/snackbar.dart';
 import '../utils/navigations.dart';
 import '../utils/colors.dart';
 import '../database/auth.dart';
@@ -17,6 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+
     _navigateAfterDelay();
   }
 
@@ -25,7 +28,15 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) {
       return;
     }
-    if (checkSession(context)) {
+    bool isConnected = (await handleConnectivity());
+    if (!mounted) {
+      return;
+    }
+    if (!isConnected) {
+      snackBar(context, 'Please check your internet connection and try again.',
+          isError: true);
+      navigateTo(context, const LoginPage(), AxisDirection.right);
+    } else if (checkSession(context)) {
       navigateTo(context, const HomePage(), AxisDirection.right);
     } else {
       navigateTo(context, const LoginPage(), AxisDirection.right);
