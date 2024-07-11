@@ -14,7 +14,7 @@ Future<void> main() async {
 
   runApp(
     ScreenUtilInit(
-      designSize: const Size(390, 844), // iPhone 15 Pro Max dimensions
+      designSize: const Size(430, 932), // iPhone 15 Pro Max dimensions
       builder: (context, child) => const MyApp(),
     ),
   );

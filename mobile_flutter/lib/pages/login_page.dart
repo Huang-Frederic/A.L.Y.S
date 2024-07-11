@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: const Text(
                     'Open the Gates',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AlysColors.black, fontWeight: FontWeight.w500),
                   ),
                 ),

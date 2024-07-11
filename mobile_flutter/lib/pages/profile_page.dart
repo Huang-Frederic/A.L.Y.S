@@ -6,7 +6,6 @@ import 'package:mobile_flutter/utils/colors.dart';
 import 'package:mobile_flutter/utils/navigations.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 import '../widgets/appbar_bell.dart';
-import '../widgets/navbar.dart';
 import '../database/auth.dart'; // Import the auth service
 
 class ProfilePage extends StatefulWidget {
@@ -35,7 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _logout() async {
     await authLogout(context);
     // Navigate to login page after logout
-    navigateTo(context, LoginPage(), AxisDirection.left);
+    navigateTo(context, const LoginPage(), AxisDirection.left);
   }
 
   @override
@@ -86,9 +85,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
-      bottomNavigationBar: const NavBar(
-        selectedLabel: 'Profile',
-      ),
     );
   }
 }

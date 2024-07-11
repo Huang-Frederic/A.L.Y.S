@@ -6,7 +6,6 @@ import 'package:mobile_flutter/widgets/book_list.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 import 'package:mobile_flutter/widgets/unex_error.dart';
 import '../widgets/appbar_bell.dart';
-import '../widgets/navbar.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -67,9 +66,6 @@ class _SearchPageState extends State<SearchPage> {
                 }
               },
             ),
-      bottomNavigationBar: const NavBar(
-        selectedLabel: 'Search',
-      ),
     );
   }
 }

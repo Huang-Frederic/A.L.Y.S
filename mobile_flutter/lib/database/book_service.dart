@@ -6,7 +6,6 @@ class BookService {
 
   Future<List<dynamic>> getAllBooks() async {
     final data = await supabase.rpc('get_all_books_with_details').select();
-    print("ARA");
     return data as List<dynamic>;
   }
 }

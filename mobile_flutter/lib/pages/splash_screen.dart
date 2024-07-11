@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:mobile_flutter/pages/home_page.dart';
 import 'package:mobile_flutter/pages/login_page.dart';
+import 'package:mobile_flutter/pages/nav_page.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:mobile_flutter/widgets/snackbar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
           isError: true);
       navigateTo(context, const LoginPage(), AxisDirection.right);
     } else if (checkSession(context)) {
-      navigateTo(context, const HomePage(), AxisDirection.right);
+      navigateTo(context, const NavPage(), AxisDirection.right);
     } else {
       navigateTo(context, const LoginPage(), AxisDirection.right);
     }

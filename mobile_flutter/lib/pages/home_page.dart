@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 import '../widgets/appbar_bell.dart';
-import '../widgets/navbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -48,9 +47,6 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-      bottomNavigationBar: const NavBar(
-        selectedLabel: 'Home',
-      ),
     );
   }
 }
