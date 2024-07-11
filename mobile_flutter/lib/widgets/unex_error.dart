@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobile_flutter/utils/navigations.dart';
 import 'package:mobile_flutter/utils/colors.dart';
 
-class NoWifiWidget extends StatelessWidget {
+class UnexError extends StatelessWidget {
   final Widget retryPage;
 
-  const NoWifiWidget({super.key, required this.retryPage});
+  const UnexError({super.key, required this.retryPage});
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +18,16 @@ class NoWifiWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.wifi_slash,
-                size: 100.sp, color: AlysColors.alysBlue),
+            SvgPicture.asset(
+              'assets/logo.svg',
+              width: 100.w,
+              height: 100.h,
+              colorFilter:
+                  const ColorFilter.mode(AlysColors.alysBlue, BlendMode.srcIn),
+            ),
             SizedBox(height: 20.h),
             Text(
-              'Oups !',
+              'Sorry !',
               style: TextStyle(
                 fontSize: 30.sp,
                 fontWeight: FontWeight.bold,
@@ -30,7 +36,7 @@ class NoWifiWidget extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              'There is no Internet connection\nPlease check your internet connection',
+              'An unexpected error occurred. \nPlease try again or contact the admin.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16.sp, color: AlysColors.alysBlue),
             ),

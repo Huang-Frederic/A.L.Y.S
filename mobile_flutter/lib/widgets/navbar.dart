@@ -49,7 +49,7 @@ class NavBar extends StatelessWidget {
       ),
       child: BottomAppBar(
         color: Colors.transparent,
-        height: 90.0.h,
+        height: 70.0.h,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
