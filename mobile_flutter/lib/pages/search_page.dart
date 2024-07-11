@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_flutter/database/book_service.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:mobile_flutter/utils/colors.dart';
-import 'package:mobile_flutter/widgets/book_list.dart';
+import 'package:mobile_flutter/widgets/book_search_list.dart';
 import 'package:mobile_flutter/widgets/no_wifi.dart';
 import 'package:mobile_flutter/widgets/unex_error.dart';
 import '../widgets/appbar_bell.dart';
@@ -62,7 +62,7 @@ class _SearchPageState extends State<SearchPage> {
                   );
                 } else {
                   final books = snapshot.data!;
-                  return BookList(books: books);
+                  return BookSearchList(books: books);
                 }
               },
             ),
