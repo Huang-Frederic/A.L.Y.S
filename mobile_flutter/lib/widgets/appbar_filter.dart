@@ -27,11 +27,12 @@ class AppBarWithFilter extends StatelessWidget implements PreferredSizeWidget {
         AppBar(
           backgroundColor: AlysColors.black,
           automaticallyImplyLeading: false,
+          toolbarHeight: 32.0.h,
           centerTitle: true,
           title: Text(
             title,
             style: TextStyle(
-              fontSize: 28.sp,
+              fontSize: 26.sp,
               fontWeight: FontWeight.w600,
               color: AlysColors.alysBlue,
             ),

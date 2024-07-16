@@ -87,6 +87,7 @@ class _SearchPageState extends State<SearchPage> {
   void _openFilterModal() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // Ensure full-screen modal
       builder: (context) {
         return FilterModal(
           authors: _authors,
