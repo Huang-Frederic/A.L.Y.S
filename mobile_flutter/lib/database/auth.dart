@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_flutter/pages/home_page.dart';
 import 'package:mobile_flutter/pages/login_page.dart';
+import 'package:mobile_flutter/pages/nav_page.dart';
 import 'package:mobile_flutter/utils/check_connectivity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/snackbar.dart';
@@ -23,7 +23,6 @@ bool checkSession(BuildContext context) {
 void authLogin(BuildContext context, String email, String password) async {
   final SupabaseClient supabase = Supabase.instance.client;
 
-  // Check for connectivity first
   if (!await handleConnectivity()) {
     if (!context.mounted) return;
     snackBar(context,
@@ -44,7 +43,7 @@ void authLogin(BuildContext context, String email, String password) async {
     if (!context.mounted) return;
 
     if (session != null && user != null) {
-      navigateTo(context, const HomePage(), AxisDirection.right);
+      navigateTo(context, const NavPage(), AxisDirection.right);
     } else {
       snackBar(context,
           'Login has failed. Please check your credentials and try again.',

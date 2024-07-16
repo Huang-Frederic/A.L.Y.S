@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
           : Center(
               child: Image.network(
                 'https://temp.compsci88.com/cover/Solo-Leveling.jpg',
-                width: 300.w,
+                width: 200.w,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) {
                     return child;

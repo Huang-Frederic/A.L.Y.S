@@ -37,7 +37,7 @@ class _NavPageState extends State<NavPage> {
         children: _pages,
       ),
       bottomNavigationBar: Container(
-        height: 110.0.h, // Set your desired height here
+        height: 110.0.h,
         decoration: BoxDecoration(
           color: AlysColors.black,
           boxShadow: [

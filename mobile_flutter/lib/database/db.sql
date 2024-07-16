@@ -1,10 +1,10 @@
-create
-or replace function public.get_all_books_with_details () returns setof RECORD language sql as $$
+CREATE OR REPLACE FUNCTION public.get_all_books_with_details() RETURNS SETOF RECORD LANGUAGE sql AS $$
 SELECT
   b.id,
   b.title,
   b.status,
   b.release,
+  a.first_name || ' ' || a.last_name AS author,
   latest_chapter.number AS latest_chapter,
   latest_chapter.release AS latest_chapter_release,
   ARRAY(SELECT g.name FROM genres g
@@ -18,6 +18,6 @@ LEFT JOIN (
     c.release
   FROM chapters c
   ORDER BY c.book_id, c.release DESC
-) AS latest_chapter
-ON b.id = latest_chapter.book_id;
+) AS latest_chapter ON b.id = latest_chapter.book_id
+LEFT JOIN authors a ON b.author_id = a.id;
 $$;

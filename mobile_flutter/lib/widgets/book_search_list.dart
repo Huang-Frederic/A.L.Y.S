@@ -27,8 +27,8 @@ class BookSearchList extends StatelessWidget {
           final coverUrl = book['cover_url'];
 
           String truncatedTitle = book['title'];
-          if (truncatedTitle.length > 45) {
-            truncatedTitle = '${truncatedTitle.substring(0, 45)}...';
+          if (truncatedTitle.length > 40) {
+            truncatedTitle = '${truncatedTitle.substring(0, 40)}...';
           }
 
           return Padding(
