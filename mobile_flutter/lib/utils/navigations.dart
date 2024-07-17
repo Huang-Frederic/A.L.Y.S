@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_flutter/pages/home_page.dart';
+import 'package:mobile_flutter/pages/nav_page.dart';
 
 void navigateTo(
     BuildContext context, Widget targetPage, AxisDirection direction) {
-  if (targetPage.runtimeType == const HomePage().runtimeType) {
+  if (targetPage.runtimeType == const NavPage().runtimeType) {
     Navigator.pushReplacement(
       context,
       CustomPageRoute(
