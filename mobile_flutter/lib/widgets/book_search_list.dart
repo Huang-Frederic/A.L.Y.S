@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_flutter/utils/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobile_flutter/pages/book_page.dart';
 
 class BookSearchList extends StatelessWidget {
   final List<dynamic> books;
@@ -33,177 +34,187 @@ class BookSearchList extends StatelessWidget {
 
           return Padding(
             padding: EdgeInsets.all(10.w),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 98.w,
-                  height: 140.h,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(5.r),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookPage(book: book),
                   ),
-                  child: coverUrl != null && coverUrl.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(5.r),
-                          child: Image.network(
-                            coverUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/placeholder_cover.png',
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          ),
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(5.r),
-                          child: Image.asset(
-                            'assets/placeholder_cover.png',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              truncatedTitle,
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AlysColors.alysBlue,
-                              ),
+                );
+              },
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 98.w,
+                    height: 140.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(5.r),
+                    ),
+                    child: coverUrl != null && coverUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(5.r),
+                            child: Image.network(
+                              coverUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/placeholder_cover.png',
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(5.r),
+                            child: Image.asset(
+                              'assets/placeholder_cover.png',
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.bookmark,
-                                color: AlysColors.alysBlue,
-                                size: 35.sp,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.h),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Latest: ',
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                truncatedTitle,
                                 style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w600,
                                   color: AlysColors.alysBlue,
                                 ),
                               ),
-                              Expanded(
-                                child: Text(
-                                  'Chapter ${book['latest_chapter']} • ${DateFormat('dd/MM/yyyy').format(latestChapterReleaseDate)}',
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.bookmark,
+                                  color: AlysColors.alysBlue,
+                                  size: 35.sp,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Latest: ',
                                   style: TextStyle(
                                     fontSize: 13.sp,
+                                    fontWeight: FontWeight.bold,
                                     color: AlysColors.alysBlue,
                                   ),
                                 ),
-                              ),
-                              if (isNew)
-                                Container(
-                                  margin: EdgeInsets.only(left: 8.w),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 5.w, vertical: 2.h),
-                                  decoration: BoxDecoration(
-                                    color: AlysColors.kingYellow,
-                                    borderRadius: BorderRadius.circular(12.r),
-                                  ),
+                                Expanded(
                                   child: Text(
-                                    'NEW',
+                                    'Chapter ${book['latest_chapter']} • ${DateFormat('dd/MM/yyyy').format(latestChapterReleaseDate)}',
                                     style: TextStyle(
-                                      fontSize: 8.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AlysColors.black,
+                                      fontSize: 13.sp,
+                                      color: AlysColors.alysBlue,
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
-                          SizedBox(height: 2.h),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Status: ',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: AlysColors.alysBlue,
+                                if (isNew)
+                                  Container(
+                                    margin: EdgeInsets.only(left: 8.w),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 5.w, vertical: 2.h),
+                                    decoration: BoxDecoration(
+                                      color: AlysColors.kingYellow,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Text(
+                                      'NEW',
+                                      style: TextStyle(
+                                        fontSize: 8.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: AlysColors.black,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                TextSpan(
-                                  text: '${book['status']} ',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: AlysColors.alysBlue,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'Year: ',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: AlysColors.alysBlue,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: '${book['release']}',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: AlysColors.alysBlue,
-                                  ),
-                                ),
                               ],
                             ),
-                          ),
-                          SizedBox(height: 2.h),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Genres: ',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: AlysColors.alysBlue,
+                            SizedBox(height: 2.h),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Status: ',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: AlysColors.alysBlue,
+                                    ),
                                   ),
-                                ),
-                                TextSpan(
-                                  text: genres,
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: AlysColors.alysBlue,
+                                  TextSpan(
+                                    text: '${book['status']} ',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      color: AlysColors.alysBlue,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  TextSpan(
+                                    text: 'Year: ',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: AlysColors.alysBlue,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '${book['release']}',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      color: AlysColors.alysBlue,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(height: 2.h),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Genres: ',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: AlysColors.alysBlue,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: genres,
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      color: AlysColors.alysBlue,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

@@ -1,10 +1,16 @@
-CREATE OR REPLACE FUNCTION public.get_all_books_with_details() RETURNS SETOF RECORD LANGUAGE sql AS $$
 SELECT
   b.id,
   b.title,
   b.status,
   b.release,
-  a.first_name || ' ' || a.last_name AS author,
+  b.cover_url,
+  b.type,
+  b.description,
+  (SELECT a.first_name || ' ' || a.last_name
+   FROM authors a
+   JOIN book_authors ba ON ba.author_id = a.id
+   WHERE ba.book_id = b.id
+   LIMIT 1) AS author,
   latest_chapter.number AS latest_chapter,
   latest_chapter.release AS latest_chapter_release,
   ARRAY(SELECT g.name FROM genres g
@@ -18,6 +24,4 @@ LEFT JOIN (
     c.release
   FROM chapters c
   ORDER BY c.book_id, c.release DESC
-) AS latest_chapter ON b.id = latest_chapter.book_id
-LEFT JOIN authors a ON b.author_id = a.id;
-$$;
+) AS latest_chapter ON b.id = latest_chapter.book_id;
